@@ -103,6 +103,10 @@ export async function remuxFile(
     }
 
     if (output.endsWith(".mp4")) {
+        // input options mean a non-file input like the padding concat list, which is always h264
+        if (input_options.length == 0) {
+            opts.push(...mp4VideoTagOptions(await videoCodec(input)));
+        }
         opts.push("-movflags", "faststart"); // make streaming possible, not sure if this is a good idea
     }
 
@@ -631,6 +635,35 @@ export async function ffprobe(filename: string): Promise<FFProbe> {
         );
         throw new Error("No output from ffprobe");
     }
+}
+
+/**
+ * Codec of the first video stream, e.g. "h264" or "hevc"
+ * @returns undefined if the file has no video stream or can't be probed
+ */
+export async function videoCodec(
+    filename: string
+): Promise<string | undefined> {
+    try {
+        const probe = await ffprobe(filename);
+        return probe.streams.find((s) => s.codec_type == "video")?.codec_name;
+    } catch (error) {
+        log(
+            LOGLEVEL.WARNING,
+            "video.videoCodec",
+            `Could not probe the video codec of ${filename}: ${
+                (error as Error).message
+            }`
+        );
+        return undefined;
+    }
+}
+
+/**
+ * ffmpeg tags hevc in mp4 as hev1 by default, which Apple devices and Safari don't play
+ */
+export function mp4VideoTagOptions(codec?: string): string[] {
+    return codec == "hevc" ? ["-tag:v", "hvc1"] : [];
 }
 
 function parseFrameRate(rate?: string): number | undefined {

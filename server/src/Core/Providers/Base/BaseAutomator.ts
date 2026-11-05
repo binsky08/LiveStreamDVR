@@ -8,7 +8,7 @@ import { xClearInterval, xInterval } from "@/Helpers/Timeout";
 import { isTwitchVOD, isTwitchVODChapter } from "@/Helpers/Types";
 import type { RemuxReturn } from "@/Helpers/Video";
 import { pausesToIntervals, totalPauseDuration } from "@/Helpers/StreamPauses";
-import { remuxFile, remuxFileWithPadding } from "@/Helpers/Video";
+import { remuxFile, remuxFileWithPadding, videoCodec } from "@/Helpers/Video";
 import type { TwitchVODChapterJSON } from "@/Storage/JSON";
 import type { VideoQuality } from "@common/Config";
 import type { NotificationCategory } from "@common/Defs";
@@ -1361,8 +1361,10 @@ export class BaseAutomator {
 
             if (this.channel && this.channel.quality) {
                 if (this.channel.quality.includes("best")) {
-                    if (this.stream_resolution !== "1080p60") {
-                        // considered best as of 2022
+                    if (
+                        !["1440p60", "1080p60"].includes(this.stream_resolution)
+                    ) {
+                        // considered best as of 2026, 1440p60 needs h265 in capture.twitch-supported-codecs
                         log(
                             LOGLEVEL.WARNING,
                             "automator.captureTicker",
@@ -2285,7 +2287,24 @@ export class BaseAutomator {
                 ? pausesToIntervals(this.vod.stream_pauses, this.vod.started_at)
                 : [];
 
-        if (pauseIntervals.length > 0) {
+        // the black filler is encoded as h264, so h265/av1 captures are converted without padding
+        const captureCodec =
+            pauseIntervals.length > 0
+                ? await videoCodec(this.capture_filename)
+                : undefined;
+        const padCapture =
+            pauseIntervals.length > 0 &&
+            (!captureCodec || captureCodec == "h264");
+
+        if (pauseIntervals.length > 0 && !padCapture) {
+            log(
+                LOGLEVEL.INFO,
+                "automator.convertVideo",
+                `Not filling ${pauseIntervals.length} stream pauses of ${this.vod.basename}, padding only supports h264 captures (capture is ${captureCodec})`
+            );
+        }
+
+        if (padCapture) {
             log(
                 LOGLEVEL.INFO,
                 "automator.convertVideo",

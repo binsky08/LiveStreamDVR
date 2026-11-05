@@ -1,7 +1,9 @@
 import { Config } from "../src/Core/Config";
 import { KeyValue } from "../src/Core/KeyValue";
 import { BaseAutomator } from "../src/Core/Providers/Base/BaseAutomator";
+import { TwitchAutomator } from "../src/Core/Providers/Twitch/TwitchAutomator";
 import { TwitchChannel } from "../src/Core/Providers/Twitch/TwitchChannel";
+import { mp4VideoTagOptions } from "../src/Helpers/Video";
 import "./environment";
 // jest.mock("Automator");
 // jest.mock("KeyValue");
@@ -51,5 +53,37 @@ describe("Automator", () => {
         expect(TA.vodBasenameTemplate()).toBe("test_{year}_{month}_{day}");
 
         // spy.mockRestore();
+    });
+
+    it("twitch supported codecs", () => {
+        const TA = new TwitchAutomator();
+
+        Config.getInstance().setConfig(
+            "capture.twitch-supported-codecs",
+            "h264"
+        );
+        expect(TA.providerArgs()).not.toContain("--twitch-supported-codecs");
+
+        Config.getInstance().setConfig(
+            "capture.twitch-supported-codecs",
+            "h264,h265"
+        );
+        const args = TA.providerArgs();
+        const index = args.indexOf("--twitch-supported-codecs");
+        expect(index).toBeGreaterThan(-1);
+        expect(args[index + 1]).toBe("h264,h265");
+
+        Config.getInstance().setConfig(
+            "capture.twitch-supported-codecs",
+            "h264"
+        );
+    });
+});
+
+describe("Video", () => {
+    it("tags hevc as hvc1 in mp4", () => {
+        expect(mp4VideoTagOptions("hevc")).toEqual(["-tag:v", "hvc1"]);
+        expect(mp4VideoTagOptions("h264")).toEqual([]);
+        expect(mp4VideoTagOptions(undefined)).toEqual([]);
     });
 });

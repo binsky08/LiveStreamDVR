@@ -666,6 +666,15 @@ export class TwitchAutomator extends BaseAutomator {
             );
         }
 
+        // 1440p and other enhanced broadcasting qualities are only offered as h265/av1
+        const codecs = Config.getInstance().cfg<string>(
+            "capture.twitch-supported-codecs",
+            "h264"
+        );
+        if (codecs && codecs != "h264") {
+            cmd.push("--twitch-supported-codecs", codecs);
+        }
+
         // enable low latency mode, probably not a good idea without testing
         if (Config.getInstance().cfg("low_latency", false)) {
             cmd.push("--twitch-low-latency");

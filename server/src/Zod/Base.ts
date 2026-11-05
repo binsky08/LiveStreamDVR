@@ -2,6 +2,8 @@ import { z } from "zod";
 
 export const VideoQuality = z.enum([
     "best",
+    "1440p60",
+    "1440p",
     "1080p60",
     "1080p",
     "720p60",

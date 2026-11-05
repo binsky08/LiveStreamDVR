@@ -394,7 +394,7 @@ export const settingsFields = createSettingsFields({
         type: "array",
         default: "h264",
         choices: ["h264", "h264,h265", "h264,h265,av1"] as string[],
-        help: "Codecs streamlink requests from Twitch. 1440p and other Enhanced Broadcasting qualities are only offered as h265/av1. h265/av1 captures don't play in every browser and can't have their stream pauses filled with black video.",
+        help: "Codecs streamlink requests from Twitch. 1440p and other Enhanced Broadcasting qualities are only offered as h265/av1, and only with a valid session token in config/twitch_oauth.txt (see Tips). h265/av1 captures don't play in every browser and can't have their stream pauses filled with black video.",
     },
 
     "capture.twitch-ttv-lol-plugin": {

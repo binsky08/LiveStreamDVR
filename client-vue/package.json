@@ -33,7 +33,7 @@
     "pinia": "^2.1.7",
     "vue": "^3.3.7",
     "vue-chartjs": "^5.2.0",
-    "vue-i18n": "beta",
+    "vue-i18n": "^11.4.18",
     "vue-observe-visibility": "next",
     "vue-router": "^4.2.5"
   },
@@ -60,14 +60,14 @@
     "npm-run-all": "^4.1.5",
     "prettier": "^3.0.3",
     "sass": "^1.64.0",
-    "typescript": "^5.2.2",
+    "typescript": "~5.2.2",
     "vite": "^4.5.0",
     "vite-plugin-pwa": "^0.16.4",
     "vitest": "^0.34.6",
     "vue-tsc": "^1.8.22",
     "zod": "^3.22.4"
   },
-  "packageManager": "yarn@4.0.1",
+  "packageManager": "yarn@4.18.1",
   "engines": {
     "node": ">=20"
   }

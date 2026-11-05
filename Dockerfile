@@ -24,7 +24,8 @@ ENV VITE_BUILD_DATE=${BUILD_DATE}
 #    libxml2-dev libxslt-dev python3-dev \
 #    bash icu-libs krb5-libs libgcc libintl libssl1.1 libstdc++ zlib fontconfig
 
-RUN apt-get update && apt-get install -y \
+# upgrade first so security fixes released after the base image was built are included
+RUN apt-get update && apt-get upgrade -y && apt-get install -y \
     ffmpeg mediainfo \
     python3 python3-pip python3-wheel libxml2-dev libxslt-dev python3-dev \
     bash git curl unzip rclone \

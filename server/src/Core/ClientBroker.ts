@@ -28,8 +28,7 @@ interface Client {
 
 export class ClientBroker {
     public static clients: Client[] = [];
-    public static wss: WebSocket.Server<WebSocket.WebSocket> | undefined =
-        undefined;
+    public static wss: WebSocket.Server | undefined = undefined;
 
     // bitmask of notification categories and providers
     public static notificationSettings: Record<NotificationCategory, number> = {
@@ -44,7 +43,7 @@ export class ClientBroker {
         system: 0,
     };
 
-    public static attach(server: WebSocket.Server<WebSocket.WebSocket>): void {
+    public static attach(server: WebSocket.Server): void {
         log(
             LOGLEVEL.INFO,
             "clientBroker.attach",

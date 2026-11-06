@@ -315,12 +315,14 @@ export class TwitchVOD extends BaseVOD {
      * @returns The Twitch VOD matching the capture ID, or undefined if not found.
      */
     public static getVodByCaptureId(capture_id: string): TwitchVOD | undefined {
-        return LiveStreamDVR.getInstance()
+        const vods = LiveStreamDVR.getInstance()
             .getVods()
-            .find<TwitchVOD>(
+            .filter<TwitchVOD>(
                 (vod): vod is TwitchVOD =>
                     isTwitchVOD(vod) && vod.capture_id == capture_id
             );
+        // a forced capture continues a stream as a _partN vod, chapter updates belong to the capturing one
+        return vods.find((vod) => vod.is_capturing) ?? vods[0];
     }
 
     public static getVodByUUID(uuid: string): TwitchVOD | undefined {

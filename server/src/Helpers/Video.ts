@@ -882,7 +882,11 @@ export async function videometadata(
 ): Promise<VideoMetadata | AudioMetadata> {
     let data: MediaInfoObject | false = false;
 
-    const filenameHash = createHash("md5").update(filename).digest("hex"); // TODO: do we need it to by dynamic?
+    // size and mtime in the key, so a new file at the same path (e.g. a restarted capture) isn't served stale data
+    const stat = fs.existsSync(filename) ? fs.statSync(filename) : undefined;
+    const filenameHash = createHash("md5")
+        .update(stat ? `${filename}:${stat.size}:${stat.mtimeMs}` : filename)
+        .digest("hex");
     const dataPath = path.join(
         BaseConfigCacheFolder.cache,
         "mediainfo",

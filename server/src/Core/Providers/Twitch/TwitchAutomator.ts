@@ -258,7 +258,8 @@ export class TwitchAutomator extends BaseAutomator {
 
             // const folder_base = TwitchHelper.vodFolder(this.broadcaster_user_login);
 
-            if (TwitchVOD.getVodByCaptureId(event.id)) {
+            // a forced capture of an already captured stream becomes a new part in download()
+            if (!this.force_record && TwitchVOD.getVodByCaptureId(event.id)) {
                 log(
                     LOGLEVEL.INFO,
                     "automator.handle",
@@ -286,7 +287,7 @@ export class TwitchAutomator extends BaseAutomator {
             }
 
             const captureVodCheck = TwitchVOD.getVodByCaptureId(event.id);
-            if (captureVodCheck) {
+            if (captureVodCheck && !this.force_record) {
                 log(
                     LOGLEVEL.INFO,
                     "automator.handle",

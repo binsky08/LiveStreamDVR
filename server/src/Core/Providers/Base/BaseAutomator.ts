@@ -71,6 +71,9 @@ export class BaseAutomator {
     private vod_episode?: number;
     private vod_absolute_episode?: number;
 
+    /** set when a forced capture continues a stream that already has a vod */
+    private vod_part?: number;
+
     private is24HourStream = false;
 
     private chunks_missing = 0;
@@ -180,9 +183,11 @@ export class BaseAutomator {
             game_id: this.getGameID(),
         };
 
-        return sanitize(
+        const basename = sanitize(
             formatString(Config.getInstance().cfg("filename_vod"), variables)
         );
+
+        return this.vod_part ? `${basename}_part${this.vod_part}` : basename;
     }
 
     public fulldir(): string {
@@ -888,7 +893,7 @@ export class BaseAutomator {
         // pre-calculate season and episode
         this.applySeasonEpisode();
 
-        const basename = this.vodBasenameTemplate();
+        let basename = this.vodBasenameTemplate();
 
         // folder base depends on vod season/episode now
         const folderBase = this.fulldir();
@@ -901,7 +906,28 @@ export class BaseAutomator {
             fs.mkdirSync(folderBase, { recursive: true });
         }
 
-        if (TwitchVOD.hasVod(basename) || TwitchVOD.getVodByCaptureId(dataId)) {
+        if (
+            this.force_record &&
+            (TwitchVOD.hasVod(basename) || TwitchVOD.getVodByCaptureId(dataId))
+        ) {
+            // the earlier capture was stopped (running jobs are caught above), keep it and record the rest as a new part
+            this.vod_part = 1;
+            do {
+                this.vod_part++;
+                basename = this.vodBasenameTemplate();
+            } while (
+                TwitchVOD.hasVod(basename) ||
+                fs.existsSync(path.join(folderBase, `${basename}.json`))
+            );
+            log(
+                LOGLEVEL.INFO,
+                "automator.download",
+                `VOD for stream ${dataId} already exists, capturing as ${basename}`
+            );
+        } else if (
+            TwitchVOD.hasVod(basename) ||
+            TwitchVOD.getVodByCaptureId(dataId)
+        ) {
             log(
                 LOGLEVEL.ERROR,
                 "automator.download",

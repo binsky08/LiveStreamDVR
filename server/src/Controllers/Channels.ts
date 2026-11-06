@@ -1538,6 +1538,7 @@ export async function ForceRecord(
                 );
 
                 const TA = new TwitchAutomator();
+                TA.force_record = true;
                 TA.handle(mock_data, metadata_proxy);
 
                 res.api(200, {
@@ -1574,6 +1575,7 @@ export async function ForceRecord(
             );
 
             const YA = new YouTubeAutomator();
+            YA.force_record = true;
             YA.broadcaster_user_id = channel.internalId;
             YA.broadcaster_user_name = channel.displayName;
             YA.broadcaster_user_login = channel.internalName;
@@ -1617,6 +1619,7 @@ export async function ForceRecord(
             );
 
             const KA = new KickAutomator();
+            KA.force_record = true;
             KA.broadcaster_user_id = channel.internalId;
             KA.broadcaster_user_name = channel.displayName;
             KA.broadcaster_user_login = channel.internalName;
